@@ -4,7 +4,7 @@ class Plot
     {
         std::vector<Point> data;
         std::string label;
-        std::string color;
+        Color color;
         int x_pos;
         int y_pos;
         int width;

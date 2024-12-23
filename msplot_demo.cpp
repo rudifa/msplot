@@ -1,5 +1,7 @@
 #include "msplot.h"
 #include <cmath>
+#include <vector>
+#include <iostream>
 
 // Function to generate a sawtooth wave
 double sawtooth(double x, double period = 2 * M_PI) {
@@ -36,28 +38,29 @@ int main()
         triangle_array.push_back(500 * triangle(time) + 500); // Scale to 0-1000 range
     }
 
-    MSPlot::Figure fig(800, 1200); // Increased height to accommodate 4 subplots
+    MSPlot::Figure fig(800, 800); // Acommodate 4 subplots
 
     // Create 4 subplots vertically
 
     fig.addSubplot(4, 1, 0); // Altitude
-    fig.plot(time_array, altitude_array, "Altitude (m)", "blue");
-    fig.plot(time_array, target_altitude_array, "Target Altitude", "red");
+    fig.plot(time_array, altitude_array, "Altitude (m)", Color::Blue);
+    fig.plot(time_array, target_altitude_array, "Target Altitude", Color::Red);
 
     fig.addSubplot(4, 1, 1); // Velocity
-    fig.plot(time_array, velocity_array, "Velocity (m/s)", "green");
+    fig.plot(time_array, velocity_array, "Velocity (m/s)", Color::Green);
 
     fig.addSubplot(4, 1, 2); // Sawtooth
-    fig.plot(time_array, sawtooth_array, "Sawtooth Wave", "orange");
+    fig.plot(time_array, sawtooth_array, "Sawtooth Wave",  Color::Purple);
 
     fig.addSubplot(4, 1, 3); // Triangle
-    fig.plot(time_array, triangle_array, "Triangle Wave", "purple");
+    fig.plot(time_array, triangle_array, "Triangle Wave", Color::Orange);
 
     const std::string filename = "msplot.svg";
 
     if (fig.save(filename))
     {
         std::cerr << "MSPlot saved as " << filename << std::endl;
+        system(("open " + filename).c_str()); // Open the file in the default browser
     }
     else
     {
