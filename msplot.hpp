@@ -95,14 +95,13 @@ class MSPlot
             }
         };
 
-        void render(Document &docsvg)
+        Group render() const
         {
+            Group group;
+
             const int margin = 40; // Add margins for labels
             int plot_width = full_width - 2 * margin;
             int plot_height = full_height - 2 * margin;
-
-            // Create subplot group
-            auto group = Group();
 
             // Create and render the Plot
             Plot plot(x_pos + margin, y_pos + margin, plot_width, plot_height, data, label, color);
@@ -111,8 +110,7 @@ class MSPlot
             // Add border around the entire subplot
             group << Rectangle(Point(x_pos, y_pos), x_pos + full_width, y_pos + full_height, Fill(), Stroke(1, color, true));
 
-            // Add the group to the SVG document
-            docsvg << group;
+            return group;
         }
     };
 
@@ -179,9 +177,9 @@ class MSPlot
 
         std::string toString()
         {
-            for (auto &subplot : subplots)
+            for (const auto &subplot : subplots)
             {
-                subplot.render(svg);
+                svg << std::move(subplot.render());
             }
 
             return svg.toString();
