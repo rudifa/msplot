@@ -1,21 +1,11 @@
 CXX = g++
-CXXFLAGS = -std=c++20 -Wall -Wextra
+CXXFLAGS = -std=c++23 -Wall -g  # Add the -g flag here
 
-TARGET = bin/msplot_demo
-SRCS = msplot_demo.cpp
-
-.PHONY: all clean run create_bin
-
-all: create_bin $(TARGET1) $(TARGET)
-
-create_bin:
-	mkdir -p bin
-
-$(TARGET): $(SRCS) | create_bin
-	$(CXX) $(CXXFLAGS) $^ -o $@
+msplot_demo: msplot_demo.cpp msplot.hpp
+	$(CXX) $(CXXFLAGS) msplot_demo.cpp -o msplot_demo
 
 clean:
-	rm -f $(TARGET)
+	rm -f msplot_demo
 
-run: $(TARGET)
-	pushd bin && ./msplot_demo && popd
+run: msplot_demo
+	./msplot_demo

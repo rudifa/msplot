@@ -1,4 +1,4 @@
-#include "msplot.h"
+#include "msplot.hpp"
 #include <cmath>
 #include <vector>
 #include <iostream>
@@ -54,6 +54,7 @@ int main()
 
     fig.addSubplot(4, 1, 3); // Triangle
     fig.plot(time_array, triangle_array, "Triangle Wave", Color::Orange);
+
 
     const std::string filename = "msplot.svg";
 
