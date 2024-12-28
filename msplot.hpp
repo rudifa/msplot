@@ -33,8 +33,10 @@ class MSPlot
             Plot(int x, int y, int w, int h, const std::vector<Point>& d, const std::string& l, const Color& c)
                 : x_pos(x), y_pos(y), width(w), height(h), data(d), label(l), color(c) {}
 
-            void render(Group& group)
+            Group render() const
             {
+                Group group;
+
                 // Find min and max values for x and y
                 double x_min = std::numeric_limits<double>::max();
                 double x_max = std::numeric_limits<double>::lowest();
@@ -72,18 +74,16 @@ class MSPlot
                     double x_pos_tick = x_pos + width * i / n;
                     // Add tick mark and value
                     group << Line(Point(x_pos_tick, y_pos + height),
-                                  Point(x_pos_tick, y_pos + height + 5),
-                                  Stroke(1, Color::Black));
+                                    Point(x_pos_tick, y_pos + height + 5),
+                                    Stroke(1, Color::Black));
                     group << Text(Point(x_pos_tick, y_pos + height + 15),
-                                  std::to_string(x_val),
-                                  Fill(Color::Black),
-                                  Font(10, "Arial"));
+                                    std::to_string(x_val),
+                                    Fill(Color::Black),
+                                    Font(10, "Arial"));
                 }
 
                 // Add labels
                 Text x_label(Point(x_pos + width / 2, y_pos + height + 20), "X-axis", Fill(Color::Black), Font(12, "Arial"));
-                // x_label.setRotation(-90);
-
                 group << x_label;
 
                 Text y_label(Point(x_pos - 10, y_pos + height / 2), "Y-axis", Fill(Color::Black), Font(12, "Arial"));
@@ -92,6 +92,8 @@ class MSPlot
 
                 Text title(Point(x_pos + width / 2, y_pos - 10), label, Fill(Color::Black), Font(14, "Arial"));
                 group << title;
+
+                return group;
             }
         };
 
@@ -104,13 +106,24 @@ class MSPlot
             int plot_height = full_height - 2 * margin;
 
             // Create and render the Plot
-            Plot plot(x_pos + margin, y_pos + margin, plot_width, plot_height, data, label, color);
-            plot.render(group);
+            Plot plot(x_pos + margin, y_pos + margin, plot_width, plot_height,
+                      data, label, color);
+            group << plot.render();
 
             // Add border around the entire subplot
-            group << Rectangle(Point(x_pos, y_pos), x_pos + full_width, y_pos + full_height, Fill(), Stroke(1, color, true));
+            group << Rectangle(Point(x_pos, y_pos),
+                               x_pos + full_width,
+                               y_pos + full_height,
+                               Fill(), Stroke(1, color, true));
 
             return group;
+        }
+
+        // We can keep this operator for convenience, but it's not strictly necessary
+        friend Document &operator<<(Document &svg, const SubplotFrame &subplot)
+        {
+            svg << subplot.render();
+            return svg;
         }
     };
 
@@ -177,10 +190,12 @@ class MSPlot
 
         std::string toString()
         {
+            Group figure_group;
             for (const auto &subplot : subplots)
             {
-                svg << std::move(subplot.render());
+                figure_group << subplot.render();
             }
+            svg << figure_group;
 
             return svg.toString();
         }
