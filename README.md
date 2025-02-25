@@ -1,3 +1,15 @@
 # MSPlot : a math simple plot
 
-> A tiny subset of mathplotlib features
+> File `src/msplot.hpp` implements small subset of mathplotlib features
+
+## CMake build and run
+
+```bash
+mkdir build
+cd build
+cmake ..
+make
+
+./msplot_demo # Run the demo
+
+```
