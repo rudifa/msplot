@@ -4,7 +4,7 @@
 #include <vector>
 #include <iostream>
 
-#include "../simple_svg/simple_svg_1.0.0.hpp"
+#include "../simpler_svg/src/simpler_svg.hpp"
 
 using namespace svg;
 
@@ -20,17 +20,21 @@ class MSPlot
         int full_width;
         int full_height;
 
+        // Default constructor
+        SubplotFrame()
+            : data(), label(), color(Color::Black), x_pos(0), y_pos(0), full_width(0), full_height(0) {}
+
         struct Plot
         {
             int x_pos;
             int y_pos;
             int width;
             int height;
-            const std::vector<Point>& data;
-            const std::string& label;
-            const Color& color;
+            const std::vector<Point> &data;
+            const std::string &label;
+            const Color &color;
 
-            Plot(int x, int y, int w, int h, const std::vector<Point>& d, const std::string& l, const Color& c)
+            Plot(int x, int y, int w, int h, const std::vector<Point> &d, const std::string &l, const Color &c)
                 : x_pos(x), y_pos(y), width(w), height(h), data(d), label(l), color(c) {}
 
             Group render() const
@@ -43,7 +47,8 @@ class MSPlot
                 double y_min = std::numeric_limits<double>::max();
                 double y_max = std::numeric_limits<double>::lowest();
 
-                for (const auto& point : data) {
+                for (const auto &point : data)
+                {
                     x_min = std::min(x_min, point.x);
                     x_max = std::max(x_max, point.x);
                     y_min = std::min(y_min, point.y);
@@ -52,18 +57,19 @@ class MSPlot
 
                 // Add data polyline
                 Polyline polyline(Stroke(1, color));
-                for (const auto& point : data) {
+                for (const auto &point : data)
+                {
                     double scaled_x = x_pos + (point.x - x_min) / (x_max - x_min) * width;
-                    double scaled_y = y_pos + height - (point.y - y_min) / (y_max - y_min) * height;
+                    double scaled_y = y_pos + (point.y - y_min) / (y_max - y_min) * height;
                     polyline << Point(scaled_x, scaled_y);
                 }
                 group << polyline;
 
                 // Add x and y axes
-                group << Line(Point(x_pos, y_pos), Point(x_pos + width, y_pos), Stroke(1, Color::Black)); // X-axis
+                group << Line(Point(x_pos, y_pos), Point(x_pos + width, y_pos), Stroke(1, Color::Black));                   // X-axis
                 group << Line(Point(x_pos, y_pos + height), Point(x_pos + width, y_pos + height), Stroke(1, Color::Black)); // X-axis
 
-                group << Line(Point(x_pos, y_pos), Point(x_pos, y_pos + height), Stroke(1, Color::Black)); // Y-axis
+                group << Line(Point(x_pos, y_pos), Point(x_pos, y_pos + height), Stroke(1, Color::Black));                 // Y-axis
                 group << Line(Point(x_pos + width, y_pos), Point(x_pos + width, y_pos + height), Stroke(1, Color::Black)); // Y-axis
 
                 // Add axis ticks and values
@@ -73,24 +79,24 @@ class MSPlot
                     double x_val = x_min + (x_max - x_min) * i / n;
                     double x_pos_tick = x_pos + width * i / n;
                     // Add tick mark and value
-                    group << Line(Point(x_pos_tick, y_pos + height),
-                                    Point(x_pos_tick, y_pos + height + 5),
-                                    Stroke(1, Color::Black));
-                    group << Text(Point(x_pos_tick, y_pos + height + 15),
-                                    std::to_string(x_val),
-                                    Fill(Color::Black),
-                                    Font(10, "Arial"));
+                    group << Line(Point(x_pos_tick, y_pos),
+                                  Point(x_pos_tick, y_pos - 5),
+                                  Stroke(1, Color::Black));
+                    group << Text(Point(x_pos_tick, y_pos - 15),
+                                  std::to_string(x_val),
+                                  Fill(Color::Black),
+                                  Font(10, "Arial"));
                 }
 
                 // Add labels
-                Text x_label(Point(x_pos + width / 2, y_pos + height + 20), "X-axis", Fill(Color::Black), Font(12, "Arial"));
-                group << x_label;
+                // Text x_label(Point(x_pos + width / 2, y_pos + height + 20), "X-axis", Fill(Color::Black), Font(12, "Arial"));
+                // group << x_label;
 
                 Text y_label(Point(x_pos - 10, y_pos + height / 2), "Y-axis", Fill(Color::Black), Font(12, "Arial"));
-                y_label.setRotation(-90);
+                y_label.setRotation(90);
                 group << y_label;
 
-                Text title(Point(x_pos + width / 2, y_pos - 10), label, Fill(Color::Black), Font(14, "Arial"));
+                Text title(Point(x_pos + width / 2, y_pos + height + 10), label, Fill(Color::Black), Font(14, "Arial"));
                 group << title;
 
                 return group;
@@ -114,7 +120,7 @@ class MSPlot
             group << Rectangle(Point(x_pos, y_pos),
                                x_pos + full_width,
                                y_pos + full_height,
-                               Fill(), Stroke(1, color, true));
+                               Fill(), Stroke(1, color));
 
             return group;
         }
@@ -127,8 +133,7 @@ class MSPlot
         }
     };
 
-    public:
-
+public:
     class Figure
     {
         std::vector<SubplotFrame> subplots;
@@ -137,17 +142,16 @@ class MSPlot
         Document svg;
 
     public:
-        // Use TopLeft layout so that (0, 0) is the top left corner of the SVG
-        // but specify coordinates in user space (origin at bottom left, +y axis upwards)
         Figure(int w, int h)
             : width(w), height(h),
-              svg("", Layout(Dimensions(w, h), Layout::TopLeft))
+              svg("", Layout(Size(w, h)))
         {
         }
 
         void addSubplot(int rows, int cols, int position)
         {
-            if (position >= rows * cols) {
+            if (position >= rows * cols)
+            {
                 throw std::out_of_range("Subplot position exceeds grid size");
             }
 
@@ -155,29 +159,34 @@ class MSPlot
             plot.full_width = width / cols;
             plot.full_height = height / rows;
             plot.x_pos = (position % cols) * plot.full_width;
-            plot.y_pos = (position / cols) * plot.full_height;
+            plot.y_pos = (rows - 1 - position / cols) * plot.full_height; // Flip y-axis positions
+            std::cerr << "Adding subplot at position " << position << " x_pos: " << plot.x_pos << ", y_pos: " << plot.y_pos << std::endl;
             subplots.push_back(plot);
         }
 
         void plot(const std::vector<double> &x, const std::vector<double> &y,
-                const std::string &label = "", const Color &color = Color::Blue)
+                  const std::string &label = "", const Color &color = Color(Color::Blue))
         {
-            std::cerr << "Figure::plot, " << label  << std::endl;
+            std::cerr << "Figure::plot, " << label << std::endl;
 
-            if (subplots.empty()) {
+            if (subplots.empty())
+            {
                 throw std::runtime_error("No subplot available. Call addSubplot first.");
             }
-            if (x.size() != y.size()) {
+            if (x.size() != y.size())
+            {
                 throw std::invalid_argument("X and Y vectors must have same size");
             }
-            if (x.empty()) {
+            if (x.empty())
+            {
                 throw std::invalid_argument("Data vectors cannot be empty");
             }
 
             auto &subplot = getCurrentSubplot();
             subplot.data.clear(); // Clear any existing data
-            for (size_t i = 0; i < x.size(); i++) {
-                subplot.data.push_back({x[i], y[i]});
+            for (size_t i = 0; i < x.size(); i++)
+            {
+                subplot.data.push_back(Point{x[i], y[i]});
             }
             subplot.label = label;
             subplot.color = color;
@@ -200,7 +209,7 @@ class MSPlot
             return svg.toString();
         }
 
-        bool save(const std::string& filename)
+        bool save(const std::string &filename)
         {
             if (subplots.empty())
             {
@@ -208,14 +217,15 @@ class MSPlot
             }
 
             std::ofstream file(filename);
-            if (!file.is_open()) {
+            if (!file.is_open())
+            {
                 std::cerr << "Failed to open file: " << filename << std::endl;
                 return false;
             }
 
-        //     std::cerr << "Saving:\n"
-        //               << toString()
-        //    << std::endl;
+            //     std::cerr << "Saving:\n"
+            //               << toString()
+            //    << std::endl;
 
             file << toString();
             file.close();

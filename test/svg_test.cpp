@@ -494,7 +494,7 @@ TEST(BoundingBoxTest, PathBoundingBox)
 
 //     auto bbox = text.get_bbox();
 //     // Note: The exact bounding box for text can be complex to calculate
-//     // This is a simplified test, assuming some basic dimensions
+//     // This is a simplified test, assuming some basic Size
 //     EXPECT_NEAR(bbox.x1, 100.0, 0.001);
 //     EXPECT_NEAR(bbox.y1, 184.0, 0.001); // 200 - 16 (assuming baseline is at y)
 //     EXPECT_TRUE(bbox.x2 > bbox.x1);     // Width should be positive
