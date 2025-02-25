@@ -4,7 +4,7 @@
 #include <vector>
 #include <iostream>
 
-#include "../simpler_svg/src/simpler_svg.hpp"
+#include "../../simpler_svg/src/simpler_svg.hpp"
 
 using namespace svg;
 
@@ -160,15 +160,12 @@ public:
             plot.full_height = height / rows;
             plot.x_pos = (position % cols) * plot.full_width;
             plot.y_pos = (rows - 1 - position / cols) * plot.full_height; // Flip y-axis positions
-            std::cerr << "Adding subplot at position " << position << " x_pos: " << plot.x_pos << ", y_pos: " << plot.y_pos << std::endl;
             subplots.push_back(plot);
         }
 
         void plot(const std::vector<double> &x, const std::vector<double> &y,
                   const std::string &label = "", const Color &color = Color(Color::Blue))
         {
-            std::cerr << "Figure::plot, " << label << std::endl;
-
             if (subplots.empty())
             {
                 throw std::runtime_error("No subplot available. Call addSubplot first.");
@@ -229,7 +226,6 @@ public:
 
             file << toString();
             file.close();
-            std::cerr << filename << " saved successfully" << std::endl;
             return true;
         }
     };
