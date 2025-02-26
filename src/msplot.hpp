@@ -28,6 +28,8 @@ class MSPlot
 
         struct Plot
         {
+            const int margin = 40;
+            const int left_margin = 80;
             int x_pos;
             int y_pos;
             int width;
@@ -37,7 +39,7 @@ class MSPlot
             const Color &color;
 
             Plot(int x, int y, int w, int h, const std::vector<Point> &d, const std::string &l, const Color &c)
-                : x_pos(x), y_pos(y), width(w), height(h), data(d), label(l), color(c) {}
+                : x_pos(x + left_margin), y_pos(y + margin), width(w - left_margin - margin), height(h - 2 * margin), data(d), label(l), color(c) {}
 
             Group group() const
             {
@@ -81,7 +83,7 @@ class MSPlot
                 // Text x_label(Point(x_pos + width / 2, y_pos + height + 20), "X-axis", Fill(Color::Black), Font(12, "Arial"));
                 // group << x_label;
 
-                Text y_label(Point(x_pos - 10, y_pos + height / 2), "Y-axis", Fill(Color::Black), Font(12, "Arial"));
+                Text y_label(Point(x_pos - 50, y_pos + height / 2), "Y-axis", Fill(Color::Black), Font(12, "Arial"));
                 y_label.setRotation(90);
                 group << y_label;
 
@@ -126,7 +128,7 @@ class MSPlot
                     ticksAndValues << Line(Point(x_pos, y_pos_tick),
                                            Point(x_pos - 5, y_pos_tick),
                                            Stroke(1, Color::Black));
-                    ticksAndValues << Text(Point(x_pos - 10, y_pos_tick),
+                    ticksAndValues << Text(Point(x_pos - 30, y_pos_tick),
                                            std::format("{:.3g}", y_val),
                                            Fill(Color::Black),
                                            Font(10, "Arial"));
@@ -141,12 +143,8 @@ class MSPlot
         {
             Group group;
 
-            const int margin = 40; // Add margins for labels
-            int plot_width = full_width - 2 * margin;
-            int plot_height = full_height - 2 * margin;
-
             // Create and render the Plot
-            Plot plot(x_pos + margin, y_pos + margin, plot_width, plot_height,
+            Plot plot(x_pos, y_pos, full_width, full_height,
                       data, label, color);
             group << plot.group();
 
