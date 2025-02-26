@@ -39,7 +39,7 @@ class MSPlot
             Plot(int x, int y, int w, int h, const std::vector<Point> &d, const std::string &l, const Color &c)
                 : x_pos(x), y_pos(y), width(w), height(h), data(d), label(l), color(c) {}
 
-            Group render() const
+            Group group() const
             {
                 Group group;
 
@@ -148,7 +148,7 @@ class MSPlot
             // Create and render the Plot
             Plot plot(x_pos + margin, y_pos + margin, plot_width, plot_height,
                       data, label, color);
-            group << plot.render();
+            group << plot.group();
 
             // Add border around the entire subplot
             group << Rectangle(Point(x_pos, y_pos),
