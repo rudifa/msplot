@@ -83,11 +83,11 @@ class MSPlot
                 // Text x_label(Point(x_pos + width / 2, y_pos + height + 20), "X-axis", Fill(Color::Black), Font(12, "Arial"));
                 // group << x_label;
 
-                Text y_label(Point(x_pos - 50, y_pos + height / 2), "Y-axis", Fill(Color::Black), Font(12, "Arial"));
+                Text y_label(Point(x_pos - 50, y_pos + height / 2), "Y-axis", Font(12, "Arial"), Fill(Color::Black));
                 y_label.setRotation(90);
                 group << y_label;
 
-                Text title(Point(x_pos + width / 2, y_pos + height + 10), label, Fill(Color::Black), Font(14, "Arial"));
+                Text title(Point(x_pos + width / 2, y_pos + height + 10), label, Font(14, "Arial"), Fill(Color::Black));
                 group << title;
 
                 return group;
@@ -108,8 +108,7 @@ class MSPlot
                                            Stroke(1, Color::Black));
                     ticksAndValues << Text(Point(x_pos_tick, y_pos - 15),
                                            std::format("{:.2f}", x_val),
-                                           Fill(Color::Black),
-                                           Font(10, "Arial"), Stroke(), 0, "middle");
+                                           Font(10, "Arial"), Fill(Color::Black), Stroke(), 0, "middle");
                 }
                 return ticksAndValues;
             }
@@ -127,8 +126,7 @@ class MSPlot
                                            Stroke(1, Color::Black));
                     ticksAndValues << Text(Point(x_pos - 10, y_pos_tick),
                                            std::format("{:.3g}", y_val),
-                                           Fill(Color::Black),
-                                           Font(10, "Arial"), Stroke(), 0, "end", "middle");
+                                           Font(10, "Arial"), Fill(Color::Black), Stroke(), 0, "end", "middle");
                     //   .setAnchor("end")
                     //   .setAlignment("middle");
                 }
