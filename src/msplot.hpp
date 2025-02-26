@@ -94,6 +94,8 @@ class MSPlot
         private:
             Group xAxisTicks(double x_min, double x_max) const
             {
+                std::cerr << "x_min: " << x_min << " x_max: " << x_max << std::endl;
+
                 Group ticksAndValues;
                 const int n = 5;
                 for (int i = 0; i <= n; i++)
@@ -105,7 +107,7 @@ class MSPlot
                                            Point(x_pos_tick, y_pos - 5),
                                            Stroke(1, Color::Black));
                     ticksAndValues << Text(Point(x_pos_tick, y_pos - 15),
-                                           std::to_string(x_val),
+                                           std::format("{:.2f}", x_val),
                                            Fill(Color::Black),
                                            Font(10, "Arial"));
                 }
@@ -113,18 +115,19 @@ class MSPlot
             }
             Group yAxisTicks(double y_min, double y_max) const
             {
+                std::cerr << "y_min: " << y_min << " y_max: " << y_max << std::endl;
                 Group ticksAndValues;
                 const int n = 2;
                 for (int i = 0; i <= n; i++)
                 {
                     double y_val = y_min + (y_max - y_min) * i / n;
-                    double y_pos_tick = y_pos + height - height * i / n;
+                    double y_pos_tick = y_pos + height * i / n;
                     // Add tick mark and value
                     ticksAndValues << Line(Point(x_pos, y_pos_tick),
                                            Point(x_pos - 5, y_pos_tick),
                                            Stroke(1, Color::Black));
                     ticksAndValues << Text(Point(x_pos - 10, y_pos_tick),
-                                           std::to_string(y_val),
+                                           std::format("{:.3g}", y_val),
                                            Fill(Color::Black),
                                            Font(10, "Arial"));
                     //   .setAnchor("end")
@@ -148,10 +151,10 @@ class MSPlot
             group << plot.render();
 
             // Add border around the entire subplot
-            // group << Rectangle(Point(x_pos, y_pos),
-            //                    full_width,
-            //                    full_height,
-            //                    Fill(), Stroke(1, color));
+            group << Rectangle(Point(x_pos, y_pos),
+                               full_width,
+                               full_height,
+                               Fill(), Stroke(1, color));
             return group;
         }
     };
