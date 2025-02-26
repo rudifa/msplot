@@ -62,7 +62,7 @@ int main()
     if (fig.save(filename))
     {
         std::cerr << "MSPlot saved as " << filename << std::endl;
-        system(("open " + filename).c_str()); // Open the file in the default browser
+        // system(("open " + filename).c_str()); // Open the file in the default browser
     }
     else
     {

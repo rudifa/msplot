@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 
 #include "../../simpler_svg/src/simpler_svg.hpp"
 
@@ -72,21 +74,8 @@ class MSPlot
                 group << Line(Point(x_pos, y_pos), Point(x_pos, y_pos + height), Stroke(1, Color::Black));                 // Y-axis
                 group << Line(Point(x_pos + width, y_pos), Point(x_pos + width, y_pos + height), Stroke(1, Color::Black)); // Y-axis
 
-                // Add axis ticks and values
-                const int n = 5;
-                for (int i = 0; i <= n; i++)
-                {
-                    double x_val = x_min + (x_max - x_min) * i / n;
-                    double x_pos_tick = x_pos + width * i / n;
-                    // Add tick mark and value
-                    group << Line(Point(x_pos_tick, y_pos),
-                                  Point(x_pos_tick, y_pos - 5),
-                                  Stroke(1, Color::Black));
-                    group << Text(Point(x_pos_tick, y_pos - 15),
-                                  std::to_string(x_val),
-                                  Fill(Color::Black),
-                                  Font(10, "Arial"));
-                }
+                group << xAxisTicks(x_min, x_max);
+                group << yAxisTicks(y_min, y_max);
 
                 // Add labels
                 // Text x_label(Point(x_pos + width / 2, y_pos + height + 20), "X-axis", Fill(Color::Black), Font(12, "Arial"));
@@ -101,9 +90,51 @@ class MSPlot
 
                 return group;
             }
+
+        private:
+            Group xAxisTicks(double x_min, double x_max) const
+            {
+                Group ticksAndValues;
+                const int n = 5;
+                for (int i = 0; i <= n; i++)
+                {
+                    double x_val = x_min + (x_max - x_min) * i / n;
+                    double x_pos_tick = x_pos + width * i / n;
+                    // Add tick mark and value
+                    ticksAndValues << Line(Point(x_pos_tick, y_pos),
+                                           Point(x_pos_tick, y_pos - 5),
+                                           Stroke(1, Color::Black));
+                    ticksAndValues << Text(Point(x_pos_tick, y_pos - 15),
+                                           std::to_string(x_val),
+                                           Fill(Color::Black),
+                                           Font(10, "Arial"));
+                }
+                return ticksAndValues;
+            }
+            Group yAxisTicks(double y_min, double y_max) const
+            {
+                Group ticksAndValues;
+                const int n = 2;
+                for (int i = 0; i <= n; i++)
+                {
+                    double y_val = y_min + (y_max - y_min) * i / n;
+                    double y_pos_tick = y_pos + height - height * i / n;
+                    // Add tick mark and value
+                    ticksAndValues << Line(Point(x_pos, y_pos_tick),
+                                           Point(x_pos - 5, y_pos_tick),
+                                           Stroke(1, Color::Black));
+                    ticksAndValues << Text(Point(x_pos - 10, y_pos_tick),
+                                           std::to_string(y_val),
+                                           Fill(Color::Black),
+                                           Font(10, "Arial"));
+                    //   .setAnchor("end")
+                    //   .setAlignment("middle");
+                }
+                return ticksAndValues;
+            }
         };
 
-        Group render() const
+        Group group() const
         {
             Group group;
 
@@ -117,19 +148,11 @@ class MSPlot
             group << plot.render();
 
             // Add border around the entire subplot
-            group << Rectangle(Point(x_pos, y_pos),
-                               x_pos + full_width,
-                               y_pos + full_height,
-                               Fill(), Stroke(1, color));
-
+            // group << Rectangle(Point(x_pos, y_pos),
+            //                    full_width,
+            //                    full_height,
+            //                    Fill(), Stroke(1, color));
             return group;
-        }
-
-        // We can keep this operator for convenience, but it's not strictly necessary
-        friend Document &operator<<(Document &svg, const SubplotFrame &subplot)
-        {
-            svg << subplot.render();
-            return svg;
         }
     };
 
@@ -139,12 +162,12 @@ public:
         std::vector<SubplotFrame> subplots;
         int width;
         int height;
-        Document svg;
+        Document document;
 
     public:
         Figure(int w, int h)
             : width(w), height(h),
-              svg("", Layout(Size(w, h)))
+              document("", Layout(Size(w, h)))
         {
         }
 
@@ -196,14 +219,12 @@ public:
 
         std::string toString()
         {
-            Group figure_group;
             for (const auto &subplot : subplots)
             {
-                figure_group << subplot.render();
+                document << subplot.group();
             }
-            svg << figure_group;
 
-            return svg.toString();
+            return document.toString();
         }
 
         bool save(const std::string &filename)
