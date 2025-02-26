@@ -96,8 +96,6 @@ class MSPlot
         private:
             Group xAxisTicks(double x_min, double x_max) const
             {
-                std::cerr << "x_min: " << x_min << " x_max: " << x_max << std::endl;
-
                 Group ticksAndValues;
                 const int n = 5;
                 for (int i = 0; i <= n; i++)
@@ -111,13 +109,12 @@ class MSPlot
                     ticksAndValues << Text(Point(x_pos_tick, y_pos - 15),
                                            std::format("{:.2f}", x_val),
                                            Fill(Color::Black),
-                                           Font(10, "Arial"));
+                                           Font(10, "Arial"), Stroke(), 0, "middle");
                 }
                 return ticksAndValues;
             }
             Group yAxisTicks(double y_min, double y_max) const
             {
-                std::cerr << "y_min: " << y_min << " y_max: " << y_max << std::endl;
                 Group ticksAndValues;
                 const int n = 2;
                 for (int i = 0; i <= n; i++)
@@ -128,10 +125,10 @@ class MSPlot
                     ticksAndValues << Line(Point(x_pos, y_pos_tick),
                                            Point(x_pos - 5, y_pos_tick),
                                            Stroke(1, Color::Black));
-                    ticksAndValues << Text(Point(x_pos - 30, y_pos_tick),
+                    ticksAndValues << Text(Point(x_pos - 10, y_pos_tick),
                                            std::format("{:.3g}", y_val),
                                            Fill(Color::Black),
-                                           Font(10, "Arial"));
+                                           Font(10, "Arial"), Stroke(), 0, "end", "middle");
                     //   .setAnchor("end")
                     //   .setAlignment("middle");
                 }
