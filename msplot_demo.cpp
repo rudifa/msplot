@@ -25,7 +25,7 @@ int main()
     std::vector<double> sawtooth_array;
     std::vector<double> triangle_array;
 
-    for (int i = 0; i < 200; ++i)
+    for (int i = 0; i <= 200; ++i)
     {
         double time = i * 0.1; // time in seconds
         time_array.push_back(time);
@@ -46,7 +46,7 @@ int main()
 
     fig.addSubplot(4, 1, 0); // Altitude
     fig.plot(time_array, altitude_array, "Altitude (m)", Color(Color::Blue));
-    fig.plot(time_array, target_altitude_array, "Target Altitude", Color(Color::Red));
+    // fig.plot(time_array, target_altitude_array, "Target Altitude", Color(Color::Red));
 
     fig.addSubplot(4, 1, 1); // Velocity
     fig.plot(time_array, velocity_array, "Velocity (m/s)", Color(Color::Green));
@@ -62,7 +62,7 @@ int main()
     if (fig.save(filename))
     {
         std::cerr << "MSPlot saved as " << filename << std::endl;
-        system(("open " + filename).c_str()); // Open the file in the default browser
+        // system(("open " + filename).c_str()); // Open the file in the default browser
     }
     else
     {
