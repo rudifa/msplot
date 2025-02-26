@@ -46,7 +46,8 @@ int main()
 
     fig.addSubplot(4, 1, 0); // Altitude
     fig.plot(time_array, altitude_array, "Altitude (m)", Color(Color::Blue));
-    // fig.plot(time_array, target_altitude_array, "Target Altitude", Color(Color::Red));
+    fig.plot(time_array, target_altitude_array, "Target Altitude", Color(Color::Red));
+    fig.plot(time_array, velocity_array, "Velocity (m/s)", Color(Color::Green));
 
     fig.addSubplot(4, 1, 1); // Velocity
     fig.plot(time_array, velocity_array, "Velocity (m/s)", Color(Color::Green));
