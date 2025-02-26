@@ -14,38 +14,41 @@ class MSPlot
 {
     struct SubplotFrame
     {
-        std::vector<Point> data;
-        std::string label;
-        Color color;
-        int x_pos;
-        int y_pos;
-        int full_width;
-        int full_height;
 
         // Default constructor
         SubplotFrame()
-            : data(), label(), color(Color::Black), x_pos(0), y_pos(0), full_width(0), full_height(0) {}
-
-        struct Plot
+            : x_pos(0), y_pos(0), full_width(0), full_height(0)
         {
-            const int margin = 40;
-            const int left_margin = 80;
-            int x_pos;
-            int y_pos;
-            int width;
-            int height;
-            const std::vector<Point> &data;
-            const std::string &label;
-            const Color &color;
+        }
 
-            Plot(int x, int y, int w, int h, const std::vector<Point> &d, const std::string &l, const Color &c)
-                : x_pos(x + left_margin), y_pos(y + margin), width(w - left_margin - margin), height(h - 2 * margin), data(d), label(l), color(c) {}
+        struct CurveData
+        {
+            std::vector<Point> data;
+            std::string label;
+            Color color;
 
-            Group group() const
+            CurveData(const std::vector<double> &x, const std::vector<double> &y,
+                      const std::string &label = "", const Color &color = Color(Color::Blue))
+                : label(label), color(color)
             {
-                Group group;
+                if (x.size() != y.size())
+                {
+                    throw std::invalid_argument("X and Y vectors must have same size");
+                }
+                if (x.empty()) // Empty data vectors
+                {
+                    throw std::invalid_argument("Data vectors cannot be empty");
+                }
+                for (size_t i = 0; i < x.size(); i++)
+                {
+                    data.push_back(Point{x[i], y[i]});
+                }
+                this->label = label;
+                this->color = color;
+            }
 
-                // Find min and max values for x and y
+            std::tuple<double, double, double, double> getMinMax() const
+            {
                 double x_min = std::numeric_limits<double>::max();
                 double x_max = std::numeric_limits<double>::lowest();
                 double y_min = std::numeric_limits<double>::max();
@@ -59,15 +62,58 @@ class MSPlot
                     y_max = std::max(y_max, point.y);
                 }
 
-                // Add data polyline
-                Polyline polyline(Stroke(1, color));
-                for (const auto &point : data)
+                return {x_min, x_max, y_min, y_max};
+            }
+        };
+
+        struct Plot
+        {
+            const int margin = 40;
+            const int left_margin = 80;
+            int x_pos;
+            int y_pos;
+            int width;
+            int height;
+            const std::vector<CurveData> &curves;
+
+            Plot(int x, int y, int w, int h, const std::vector<CurveData> &cd)
+                : x_pos(x + left_margin), y_pos(y + margin), width(w - left_margin - margin), height(h - 2 * margin), curves(cd) {}
+
+            Group group() const
+            {
+
+                // Find min and max values for x and y
+                double x_min = std::numeric_limits<double>::max();
+                double x_max = std::numeric_limits<double>::lowest();
+                double y_min = std::numeric_limits<double>::max();
+                double y_max = std::numeric_limits<double>::lowest();
+
+                for (const auto &curve : curves)
                 {
-                    double scaled_x = x_pos + (point.x - x_min) / (x_max - x_min) * width;
-                    double scaled_y = y_pos + (point.y - y_min) / (y_max - y_min) * height;
-                    polyline << Point(scaled_x, scaled_y);
+                    auto [curve_x_min, curve_x_max, curve_y_min, curve_y_max] = curve.getMinMax();
+                    x_min = std::min(x_min, curve_x_min);
+                    x_max = std::max(x_max, curve_x_max);
+                    y_min = std::min(y_min, curve_y_min);
+                    y_max = std::max(y_max, curve_y_max);
                 }
-                group << polyline;
+
+                Group group;
+                std::string title;
+                // Add data polylines to the group
+                for (const auto &curve : curves)
+                {
+                    Polyline polyline(Stroke(1, curve.color));
+                    for (const auto &point : curve.data)
+                    {
+                        double scaled_x = x_pos + (point.x - x_min) / (x_max - x_min) * width;
+                        double scaled_y = y_pos + (point.y - y_min) / (y_max - y_min) * height;
+                        polyline << Point(scaled_x, scaled_y);
+                    }
+                    group << polyline;
+
+                    title += curve.label + "  ";
+                }
+                group << Text(Point(x_pos + width / 2, y_pos + height + 10), title, Font(14, "Arial"), Fill(Color::Black), Stroke(), 0, "middle");
 
                 // Add x and y axes
                 group << Line(Point(x_pos, y_pos), Point(x_pos + width, y_pos), Stroke(1, Color::Black));                   // X-axis
@@ -86,9 +132,6 @@ class MSPlot
                 Text y_label(Point(x_pos - 50, y_pos + height / 2), "Y-axis", Font(12, "Arial"), Fill(Color::Black));
                 y_label.setRotation(90);
                 group << y_label;
-
-                Text title(Point(x_pos + width / 2, y_pos + height + 10), label, Font(14, "Arial"), Fill(Color::Black));
-                group << title;
 
                 return group;
             }
@@ -134,20 +177,26 @@ class MSPlot
             }
         };
 
+        std::vector<CurveData> curves;
+        int x_pos;
+        int y_pos;
+        int full_width;
+        int full_height;
+
         Group group() const
         {
             Group group;
 
             // Create and render the Plot
             Plot plot(x_pos, y_pos, full_width, full_height,
-                      data, label, color);
+                      curves);
             group << plot.group();
 
             // Add border around the entire subplot
             group << Rectangle(Point(x_pos, y_pos),
                                full_width,
                                full_height,
-                               Fill(), Stroke(1, color));
+                               Fill(), Stroke(1, Color(Color::Silver)));
             return group;
         }
     };
@@ -174,12 +223,12 @@ public:
                 throw std::out_of_range("Subplot position exceeds grid size");
             }
 
-            SubplotFrame plot;
-            plot.full_width = width / cols;
-            plot.full_height = height / rows;
-            plot.x_pos = (position % cols) * plot.full_width;
-            plot.y_pos = (rows - 1 - position / cols) * plot.full_height; // Flip y-axis positions
-            subplots.push_back(plot);
+            SubplotFrame subplot;
+            subplot.full_width = width / cols;
+            subplot.full_height = height / rows;
+            subplot.x_pos = (position % cols) * subplot.full_width;
+            subplot.y_pos = (rows - 1 - position / cols) * subplot.full_height; // Flip y-axis positions
+            subplots.push_back(subplot);
         }
 
         void plot(const std::vector<double> &x, const std::vector<double> &y,
@@ -199,13 +248,8 @@ public:
             }
 
             auto &subplot = getCurrentSubplot();
-            subplot.data.clear(); // Clear any existing data
-            for (size_t i = 0; i < x.size(); i++)
-            {
-                subplot.data.push_back(Point{x[i], y[i]});
-            }
-            subplot.label = label;
-            subplot.color = color;
+            auto curveData = SubplotFrame::CurveData(x, y, label, color);
+            subplot.curves.push_back(curveData);
         }
 
         SubplotFrame &getCurrentSubplot()
