@@ -1,10 +1,10 @@
 #ifndef msplot_H
 #define msplot_H
 
-#include <vector>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
+#include <vector>
 
 #include "../../simpler_svg/src/simpler_svg.hpp"
 
@@ -14,12 +14,8 @@ class MSPlot
 {
     struct SubplotFrame
     {
-
         // Default constructor
-        SubplotFrame()
-            : x_pos(0), y_pos(0), full_width(0), full_height(0)
-        {
-        }
+        SubplotFrame() : x_pos(0), y_pos(0), full_width(0), full_height(0) {}
 
         struct CurveData
         {
@@ -27,15 +23,18 @@ class MSPlot
             std::string label;
             Color color;
 
-            CurveData(const std::vector<double> &x, const std::vector<double> &y,
-                      const std::string &label = "", const Color &color = Color(Color::Blue))
+            CurveData(const std::vector<double> &x,
+                      const std::vector<double> &y,
+                      const std::string &label = "",
+                      const Color &color = Color(Color::Blue))
                 : label(label), color(color)
             {
                 if (x.size() != y.size())
                 {
-                    throw std::invalid_argument("X and Y vectors must have same size");
+                    throw std::invalid_argument(
+                        "X and Y vectors must have same size");
                 }
-                if (x.empty()) // Empty data vectors
+                if (x.empty())  // Empty data vectors
                 {
                     throw std::invalid_argument("Data vectors cannot be empty");
                 }
@@ -77,11 +76,16 @@ class MSPlot
             const std::vector<CurveData> &curves;
 
             Plot(int x, int y, int w, int h, const std::vector<CurveData> &cd)
-                : x_pos(x + left_margin), y_pos(y + margin), width(w - left_margin - margin), height(h - 2 * margin), curves(cd) {}
+                : x_pos(x + left_margin),
+                  y_pos(y + margin),
+                  width(w - left_margin - margin),
+                  height(h - 2 * margin),
+                  curves(cd)
+            {
+            }
 
             Group group() const
             {
-
                 // Find min and max values for x and y
                 double x_min = std::numeric_limits<double>::max();
                 double x_max = std::numeric_limits<double>::lowest();
@@ -90,7 +94,8 @@ class MSPlot
 
                 for (const auto &curve : curves)
                 {
-                    auto [curve_x_min, curve_x_max, curve_y_min, curve_y_max] = curve.getMinMax();
+                    auto [curve_x_min, curve_x_max, curve_y_min, curve_y_max] =
+                        curve.getMinMax();
                     x_min = std::min(x_min, curve_x_min);
                     x_max = std::max(x_max, curve_x_max);
                     y_min = std::min(y_min, curve_y_min);
@@ -105,38 +110,50 @@ class MSPlot
                     Polyline polyline(Stroke(1, curve.color));
                     for (const auto &point : curve.data)
                     {
-                        double scaled_x = x_pos + (point.x - x_min) / (x_max - x_min) * width;
-                        double scaled_y = y_pos + (point.y - y_min) / (y_max - y_min) * height;
+                        double scaled_x =
+                            x_pos + (point.x - x_min) / (x_max - x_min) * width;
+                        double scaled_y = y_pos + (point.y - y_min) /
+                                                      (y_max - y_min) * height;
                         polyline << Point(scaled_x, scaled_y);
                     }
                     group << polyline;
 
                     title += curve.label + "  ";
                 }
-                group << Text(Point(x_pos + width / 2, y_pos + height + 10), title, Font(14, "Arial"), Fill(Color::Black), Stroke(), 0, "middle");
+                group << Text(Point(x_pos + width / 2, y_pos + height + 10),
+                              title, Font(14, "Arial"), Fill(Color::Black),
+                              Stroke(), 0, "middle");
 
                 // Add x and y axes
-                group << Line(Point(x_pos, y_pos), Point(x_pos + width, y_pos), Stroke(1, Color::Black));                   // X-axis
-                group << Line(Point(x_pos, y_pos + height), Point(x_pos + width, y_pos + height), Stroke(1, Color::Black)); // X-axis
+                group << Line(Point(x_pos, y_pos), Point(x_pos + width, y_pos),
+                              Stroke(1, Color::Black));  // X-axis
+                group << Line(Point(x_pos, y_pos + height),
+                              Point(x_pos + width, y_pos + height),
+                              Stroke(1, Color::Black));  // X-axis
 
-                group << Line(Point(x_pos, y_pos), Point(x_pos, y_pos + height), Stroke(1, Color::Black));                 // Y-axis
-                group << Line(Point(x_pos + width, y_pos), Point(x_pos + width, y_pos + height), Stroke(1, Color::Black)); // Y-axis
+                group << Line(Point(x_pos, y_pos), Point(x_pos, y_pos + height),
+                              Stroke(1, Color::Black));  // Y-axis
+                group << Line(Point(x_pos + width, y_pos),
+                              Point(x_pos + width, y_pos + height),
+                              Stroke(1, Color::Black));  // Y-axis
 
                 group << xAxisTicks(x_min, x_max);
                 group << yAxisTicks(y_min, y_max);
 
                 // Add labels
-                // Text x_label(Point(x_pos + width / 2, y_pos + height + 20), "X-axis", Fill(Color::Black), Font(12, "Arial"));
-                // group << x_label;
+                // Text x_label(Point(x_pos + width / 2, y_pos + height + 20),
+                // "X-axis", Fill(Color::Black), Font(12, "Arial")); group <<
+                // x_label;
 
-                Text y_label(Point(x_pos - 50, y_pos + height / 2), "Y-axis", Font(12, "Arial"), Fill(Color::Black));
+                Text y_label(Point(x_pos - 50, y_pos + height / 2), "Y-axis",
+                             Font(12, "Arial"), Fill(Color::Black));
                 y_label.setRotation(90);
                 group << y_label;
 
                 return group;
             }
 
-        private:
+           private:
             Group xAxisTicks(double x_min, double x_max) const
             {
                 Group ticksAndValues;
@@ -149,9 +166,10 @@ class MSPlot
                     ticksAndValues << Line(Point(x_pos_tick, y_pos),
                                            Point(x_pos_tick, y_pos - 5),
                                            Stroke(1, Color::Black));
-                    ticksAndValues << Text(Point(x_pos_tick, y_pos - 15),
-                                           std::format("{:.2f}", x_val),
-                                           Font(10, "Arial"), Fill(Color::Black), Stroke(), 0, "middle");
+                    ticksAndValues
+                        << Text(Point(x_pos_tick, y_pos - 15),
+                                std::format("{:.2f}", x_val), Font(10, "Arial"),
+                                Fill(Color::Black), Stroke(), 0, "middle");
                 }
                 return ticksAndValues;
             }
@@ -167,9 +185,10 @@ class MSPlot
                     ticksAndValues << Line(Point(x_pos, y_pos_tick),
                                            Point(x_pos - 5, y_pos_tick),
                                            Stroke(1, Color::Black));
-                    ticksAndValues << Text(Point(x_pos - 10, y_pos_tick),
-                                           std::format("{:.3g}", y_val),
-                                           Font(10, "Arial"), Fill(Color::Black), Stroke(), 0, "end", "middle");
+                    ticksAndValues << Text(
+                        Point(x_pos - 10, y_pos_tick),
+                        std::format("{:.3g}", y_val), Font(10, "Arial"),
+                        Fill(Color::Black), Stroke(), 0, "end", "middle");
                     //   .setAnchor("end")
                     //   .setAlignment("middle");
                 }
@@ -188,20 +207,17 @@ class MSPlot
             Group group;
 
             // Create and render the Plot
-            Plot plot(x_pos, y_pos, full_width, full_height,
-                      curves);
+            Plot plot(x_pos, y_pos, full_width, full_height, curves);
             group << plot.group();
 
             // Add border around the entire subplot
-            group << Rectangle(Point(x_pos, y_pos),
-                               full_width,
-                               full_height,
+            group << Rectangle(Point(x_pos, y_pos), full_width, full_height,
                                Fill(), Stroke(1, Color(Color::Silver)));
             return group;
         }
     };
 
-public:
+   public:
     class Figure
     {
         std::vector<SubplotFrame> subplots;
@@ -209,10 +225,9 @@ public:
         int height;
         Document document;
 
-    public:
+       public:
         Figure(int w, int h)
-            : width(w), height(h),
-              document("", Layout(Size(w, h)))
+            : width(w), height(h), document("", Layout(Size(w, h)))
         {
         }
 
@@ -227,20 +242,24 @@ public:
             subplot.full_width = width / cols;
             subplot.full_height = height / rows;
             subplot.x_pos = (position % cols) * subplot.full_width;
-            subplot.y_pos = (rows - 1 - position / cols) * subplot.full_height; // Flip y-axis positions
+            subplot.y_pos = (rows - 1 - position / cols) *
+                            subplot.full_height;  // Flip y-axis positions
             subplots.push_back(subplot);
         }
 
         void plot(const std::vector<double> &x, const std::vector<double> &y,
-                  const std::string &label = "", const Color &color = Color(Color::Blue))
+                  const std::string &label = "",
+                  const Color &color = Color(Color::Blue))
         {
             if (subplots.empty())
             {
-                throw std::runtime_error("No subplot available. Call addSubplot first.");
+                throw std::runtime_error(
+                    "No subplot available. Call addSubplot first.");
             }
             if (x.size() != y.size())
             {
-                throw std::invalid_argument("X and Y vectors must have same size");
+                throw std::invalid_argument(
+                    "X and Y vectors must have same size");
             }
             if (x.empty())
             {
@@ -252,10 +271,7 @@ public:
             subplot.curves.push_back(curveData);
         }
 
-        SubplotFrame &getCurrentSubplot()
-        {
-            return subplots.back();
-        }
+        SubplotFrame &getCurrentSubplot() { return subplots.back(); }
 
         std::string toString()
         {
@@ -291,4 +307,4 @@ public:
         }
     };
 };
-#endif // msplot_H
+#endif  // msplot_H
